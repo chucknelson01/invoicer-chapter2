@@ -1,0 +1,31 @@
+
+ADDITIONAL: You need to create a role for EC2 to communicate with Elastic Bean Stalk
+
+SAMPLE STEPS
+
+Open the Roles page in the IAM console.
+
+Create Role
+
+Common use cases -> EC2
+
+Choose Policy Name -> AWSElasticBeanstalkFullAccess
+
+Skip tag
+
+Choose Role name: chucknelson01-role
+
+NOTE: Map to this JSON snippet in the ebs-options.jsonfile
+
+    {
+        "Namespace": "aws:autoscaling:launchconfiguration",
+        "OptionName": "IamInstanceProfile",
+        "Value": "chucknelson01-role"
+    }
+
+
+ADDITIONAL: To clean up aws resources - delete the RDS instance, then the securit group and then the elastic bean stalk
+
+
+
+
