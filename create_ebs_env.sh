@@ -15,8 +15,10 @@ fail() {
 export AWS_DEFAULT_REGION=${AWS_REGION:-us-east-1}
 
 datetag=$(date +%Y%m%d%H%M)
-#identifier=$(`chucknelson01`)ivcr$datetag
-identifier="chucknelson01"
+# whoami returns firstname.lastname which causes the script to fail 
+
+identifier="chucknelson01"$datetag
+
 mkdir -p tmp/$identifier
 
 echo "Creating EBS application $identifier"
@@ -25,6 +27,16 @@ echo "Creating EBS application $identifier"
 aws ec2 describe-vpcs --filters Name=isDefault,Values=true > tmp/$identifier/defaultvpc.json || fail
 vpcid=$(jq -r '.Vpcs[0].VpcId' tmp/$identifier/defaultvpc.json)
 echo "default vpc is $vpcid"
+
+
+
+aws iam create-role --role-name chucknelson01-role --assume-role-policy-document file://chucknelson01-role-trust-policy.json
+
+aws iam attach-role-policy --role-name chucknelson01-role --policy-arn "arn:aws:iam::aws:policy/AWSElasticBeanstalkFullAccess"
+
+
+aws iam list-attached-role-policies --role-name chucknelson01-role
+
 
 # Create a security group for the database
 aws ec2 create-security-group \
@@ -82,6 +94,7 @@ echo "ElasticBeanTalk application created"
 dockerstack="$(aws elasticbeanstalk list-available-solution-stacks | \
     jq -r '.SolutionStacks[]' | grep -E '.+Amazon Linux.+running Docker.+' | head -1)"
 
+echo "DEBUG dbhost=$dbhost"
 # Create the EB API environment
 sed "s/POSTGRESPASSREPLACEME/$dbpass/" ebs-options.json > tmp/$identifier/ebs-options.json || fail
 sed "s/POSTGRESHOSTREPLACEME/$dbhost/" tmp/$identifier/ebs-options.json || fail
