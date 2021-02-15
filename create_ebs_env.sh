@@ -29,12 +29,16 @@ vpcid=$(jq -r '.Vpcs[0].VpcId' tmp/$identifier/defaultvpc.json)
 echo "default vpc is $vpcid"
 
 
+aws iam create-role --role-name chucknelson01-role --assume-role-policy-document file://chucknelson01-ec2-trust.json
 
-aws iam create-role --role-name chucknelson01-role --assume-role-policy-document file://chucknelson01-role-trust-policy.json
 
 aws iam attach-role-policy --role-name chucknelson01-role --policy-arn "arn:aws:iam::aws:policy/AWSElasticBeanstalkFullAccess"
 
+aws iam create-instance-profile --instance-profile-name chucknelson01-role
 
+aws iam add-role-to-instance-profile --instance-profile-name chucknelson01-role --role-name chucknelson01-role
+
+sleep 10
 aws iam list-attached-role-policies --role-name chucknelson01-role
 
 
